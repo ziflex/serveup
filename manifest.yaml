@@ -1,0 +1,27 @@
+name: getpapers
+version: 1.0.0
+endpoints:
+  - path: /curl
+    methods:
+      - name: GET
+        description: Retrieves urls using curl
+        program:
+          name: curl
+          args: [ "-v", "{{ .Req.Query.url }}"]
+
+  - path: /k8s/:type/:name
+    methods:
+      - name: GET
+        description: Returns information about Kubernetes resources
+        program: kubectl
+        args: [ "-n", "{{ .Env.NAMESPACE }}", "get", "{{ .Req.Params.type }}", "{{ .Req.Params.name }}" ]
+
+  - path: /k8s
+    methods:
+      - name: POST
+        description: Creates or updates Kubernetes resources
+        program:
+          name: kubectl
+          args: [ "-n", "{{ .Env.NAMESPACE }}", "apply" ]
+          stdin: {{ .Req.Body }}
+        response: {{ (dict "Resp" .Program.Output }}
